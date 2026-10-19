@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "575875889795",
+    "project_id": "tour-guide-7d400",
+    "storage_bucket": "tour-guide-7d400.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:575875889795:android:7210b0d90eea14619679b6",
+        "android_client_info": {
+          "package_name": "com.example.push_notification_apps"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNuMLtVPf6s5IzjCYss1GsMr3TF38cOJ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: Check if caller is authenticated via Firebase Auth (Anonymous or Custom/Email)
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper: Check if caller is an authorized sender in authorized_senders collection
+    function isAuthorizedSender() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/authorized_senders/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/authorized_senders/$(request.auth.uid)).data.isAuthorized == true;
+    }
+
+    // Devices Collection
+    // 1. Reading: Allowed ONLY for authorized senders (Requirement 9), or a device inspecting its own record
+    // 2. Writing: Disallowed from client direct writes. Registration and token updates MUST pass through
+    //    the secure 'registerDevice' and 'updateDeviceToken' Cloud Functions via Admin SDK (Requirements 4, 5, 9, 11).
+    match /devices/{deviceId} {
+      allow read: if isAuthorizedSender() || (isAuthenticated() && resource.data.ownerUid == request.auth.uid);
+      allow write: if false;
+    }
+
+    // Authorized Senders Collection
+    // - Authenticated callers can check their own authorization status
+    // - Writing / modifying sender privileges is restricted to authorized admin senders
+    match /authorized_senders/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAuthorizedSender());
+      allow write: if isAuthorizedSender();
+    }
+
+    // Notification Delivery Log Collection
+    // - Accessible only by authorized senders for tracking message history
+    match /notifications_log/{logId} {
+      allow read, write: if isAuthorizedSender();
+    }
+  }
+}
